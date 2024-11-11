@@ -5,10 +5,15 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.os.Bundle
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import androidx.core.os.bundleOf
 import com.github.gunin_igor75.androidsdktask.R
+import com.github.gunin_igor75.androidsdktask.utils.getParcelableProvider
+import java.util.Random
 import kotlin.properties.Delegates
 
 
@@ -31,7 +36,15 @@ class CustomView(
 
     private lateinit var borderPaint: Paint
 
+    private lateinit var fillPaint: Paint
+
+    private val random = Random()
+
+    private var countAttempt: Int = 0
+
     private val rect = RectF(0f, 0f, 0f, 0f)
+
+    private val rectCountAttempt = RectF(0f, 0f, 0f, 0f)
 
     init {
         if (attributeSet != null) {
@@ -40,6 +53,39 @@ class CustomView(
             initDefaultAttributes()
         }
         initPaints()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val minWidth = suggestedMinimumWidth + paddingStart + paddingEnd
+        val minHeight = suggestedMinimumHeight + paddingTop + paddingBottom
+        setMeasuredDimension(
+            resolveSize(minWidth, widthMeasureSpec),
+            resolveSize(minHeight, heightMeasureSpec)
+        )
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+
+        rect.bottom = height.toFloat()
+        rect.right = width.toFloat()
+
+        canvas.drawRect(rect, borderPaint)
+    }
+
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        return bundleOf(
+            KEY_COUNT_ATTEMPT to countAttempt,
+            KEY_SUPER_STATE to superState
+        )
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        val bundle = state as Bundle
+        val saveCountAttempt = bundle.getInt(KEY_COUNT_ATTEMPT)
+        countAttempt = saveCountAttempt
+        super.onRestoreInstanceState(bundle.getParcelableProvider(KEY_SUPER_STATE))
     }
 
     private fun initAttributes(attributeSet: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
@@ -63,27 +109,39 @@ class CustomView(
         borderPaint.style = Paint.Style.STROKE
         borderPaint.strokeWidth =
             TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3f, resources.displayMetrics)
+
+        fillPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        fillPaint.color = getRandomColor()
+        fillPaint.style = Paint.Style.FILL
     }
 
-    companion object {
-        private const val DEFAULT_COLOR_BORDER = Color.GREEN
+    private fun setupNextRect(width: Float, height: Float) {
+        val proportion = countAttempt.toFloat() / 10
+        val currentWidth = proportion * width
+        val currentHeight = proportion * height
+        rectCountAttempt.right = currentWidth
+        rectCountAttempt.bottom = currentHeight
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val minWidth = suggestedMinimumWidth + paddingStart + paddingEnd
-        val minHeight = suggestedMinimumHeight + paddingTop + paddingBottom
-        setMeasuredDimension(
-            resolveSize(minWidth, widthMeasureSpec),
-            resolveSize(minHeight, heightMeasureSpec)
+    private fun getRandomColor(): Int {
+        return Color.rgb(
+            random.nextInt(256),
+            random.nextInt(256),
+            random.nextInt(256)
         )
     }
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
+//    private fun drawRandomRectFill(canvas: Canvas) {
+//        repeat(countAttempt){ index ->
+//            canvas.drawDoubleRoundRect(
+//
+//            )
+//        }
+//    }
 
-        rect.bottom = height.toFloat()
-        rect.right = width.toFloat()
-
-        canvas.drawRect(rect, borderPaint)
+    companion object {
+        private const val DEFAULT_COLOR_BORDER = Color.GREEN
+        private const val KEY_COUNT_ATTEMPT = "key_count_attempt"
+        private const val KEY_SUPER_STATE = "key_super_state"
     }
 }
