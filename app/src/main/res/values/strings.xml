@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AndroidSdkTask</string>
+    <string name="content_text">The phone is charging</string>
 </resources>
