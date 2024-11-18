@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomView">
+        <attr name="colorBorder" format="color"/>
+    </declare-styleable>
+
+    // атрибут стандартного стиля для customView
+    <attr name="CustomViewStyle" format="reference"/>
+
+
+</resources>
