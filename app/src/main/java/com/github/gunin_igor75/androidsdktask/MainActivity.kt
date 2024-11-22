@@ -6,12 +6,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.github.gunin_igor75.androidsdktask.databinding.ActivityMainBinding
-import com.github.gunin_igor75.androidsdktask.navigator.Navigator
+import com.github.gunin_igor75.androidsdktask.navigator.Router
+import com.github.gunin_igor75.androidsdktask.navigator.RouterHandler
 import com.github.gunin_igor75.androidsdktask.screens.FragmentOne
 
-class MainActivity : AppCompatActivity(), Navigator {
+class MainActivity : AppCompatActivity(), RouterHandler {
 
     private lateinit var binding: ActivityMainBinding
+
+    override val router: Router = object : Router{
+        override fun launch(fragment: Fragment) {
+            launchFragment(fragment)
+        }
+
+        override fun goBack() {
+            onBackPressedDispatcher.onBackPressed()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,14 +33,6 @@ class MainActivity : AppCompatActivity(), Navigator {
             launchFragment(FragmentOne.newInstance(), false)
         }
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentCallBacks, false)
-    }
-
-    override fun launch(fragment: Fragment) {
-        launchFragment(fragment)
-    }
-
-    override fun goBack() {
-        onBackPressedDispatcher.onBackPressed()
     }
 
     override fun onDestroy() {
